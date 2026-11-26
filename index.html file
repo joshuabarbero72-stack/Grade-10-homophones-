@@ -1,0 +1,379 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grade 10 Homophone Listening & Auditory Discrimination Lab</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Plus Jakarta Sans', 'sans-serif'],
+          },
+          colors: {
+            academic: {
+              50: '#f0f7ff',
+              100: '#e0effe',
+              200: '#bae0fd',
+              300: '#7cc8fb',
+              400: '#36acf6',
+              500: '#0c91e7',
+              600: '#0073c5',
+              700: '#015ca0',
+              800: '#064e84',
+              900: '#0b416e',
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    /* Custom animations for audio pulse & smooth transitions */
+    @keyframes soundWave {
+      0%, 100% { transform: scaleY(0.4); }
+      50% { transform: scaleY(1); }
+    }
+    .wave-bar {
+      animation: soundWave 0.9s ease-in-out infinite;
+    }
+    .wave-bar:nth-child(2) { animation-delay: 0.15s; }
+    .wave-bar:nth-child(3) { animation-delay: 0.3s; }
+    .wave-bar:nth-child(4) { animation-delay: 0.45s; }
+
+    /* Print styling for student score report */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #printable-report, #printable-report * {
+        visibility: visible;
+      }
+      #printable-report {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        background: white !important;
+        color: black !important;
+        box-shadow: none !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col selection:bg-academic-200 selection:text-academic-900">
+
+  <!-- Top Research Alignment Banner -->
+  <div class="bg-academic-900 text-academic-50 text-xs sm:text-sm py-2 px-4 border-b border-academic-800">
+    <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-academic-700 text-academic-100 uppercase tracking-wider">
+          Action Research Tool
+        </span>
+        <span class="truncate">Aligned with: <strong>"Developing Activities for Homophones for the Grade 10"</strong> (Listening Comprehension)</span>
+      </div>
+      <button onclick="toggleModal('research-modal', true)" class="text-academic-200 hover:text-white underline font-medium inline-flex items-center gap-1 transition">
+        <i data-lucide="info" class="w-3.5 h-3.5"></i> Research Info
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Navigation Header -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3.5 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      <!-- Brand / Title -->
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-academic-500 to-academic-700 flex items-center justify-center text-white shadow-md shadow-academic-200">
+            <i data-lucide="headphones" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h1 class="font-display font-bold text-slate-900 text-base sm:text-lg leading-tight">
+              Grade 10 Homophone Lab
+            </h1>
+            <p class="text-xs text-slate-500">Auditory Discrimination & Listening Comprehension</p>
+          </div>
+        </div>
+
+        <!-- Global Speech Speed & Audio Status Pill (Mobile compact) -->
+        <div class="flex md:hidden items-center gap-1.5 bg-academic-50 border border-academic-200 rounded-xl p-1">
+          <button onclick="setSpeechRate(1.0)" id="rate-normal-mobile" class="px-2 py-1 text-xs font-semibold rounded-lg bg-academic-600 text-white transition">1.0x</button>
+          <button onclick="setSpeechRate(0.75)" id="rate-slow-mobile" class="px-2 py-1 text-xs font-semibold rounded-lg text-academic-700 hover:bg-academic-100 transition">0.75x</button>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs + Audio Controls -->
+      <div class="flex flex-wrap items-center justify-between md:justify-end gap-2 sm:gap-3">
+        <!-- Module Navigation -->
+        <nav class="flex bg-slate-100 p-1 rounded-xl w-full sm:w-auto overflow-x-auto" aria-label="Learning Modules">
+          <button onclick="switchTab('explorer')" id="tab-explorer" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition bg-white text-academic-700 shadow-sm">
+            <i data-lucide="book-open" class="w-4 h-4"></i>
+            <span>1. Sound Explorer</span>
+          </button>
+          <button onclick="switchTab('practice')" id="tab-practice" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition text-slate-600 hover:text-slate-900">
+            <i data-lucide="ear" class="w-4 h-4"></i>
+            <span>2. Sound Drill</span>
+          </button>
+          <button onclick="switchTab('quiz')" id="tab-quiz" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition text-slate-600 hover:text-slate-900">
+            <i data-lucide="clipboard-check" class="w-4 h-4"></i>
+            <span>3. 20-Item Quiz</span>
+          </button>
+        </nav>
+
+        <!-- Desktop Audio Rate Control -->
+        <div class="hidden md:flex items-center gap-2 bg-academic-50 border border-academic-200 rounded-xl px-2.5 py-1.5">
+          <span class="text-xs font-medium text-academic-800 flex items-center gap-1">
+            <i data-lucide="gauge" class="w-3.5 h-3.5 text-academic-600"></i> Speed:
+          </span>
+          <div class="flex items-center gap-1">
+            <button onclick="setSpeechRate(1.0)" id="rate-normal-desktop" class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-academic-600 text-white shadow-sm transition">
+              Normal (1.0x)
+            </button>
+            <button onclick="setSpeechRate(0.75)" id="rate-slow-desktop" class="px-2.5 py-1 text-xs font-semibold rounded-lg text-academic-700 hover:bg-academic-100 transition">
+              Slow (0.75x)
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Floating Audio Status Toast (shows when TTS is speaking) -->
+  <div id="audio-indicator" class="fixed bottom-5 right-5 z-40 hidden items-center gap-3 bg-academic-900 text-white px-4 py-3 rounded-2xl shadow-xl border border-academic-700">
+    <div class="flex items-end gap-1 h-4">
+      <span class="w-1 h-full bg-academic-300 rounded-full wave-bar"></span>
+      <span class="w-1 h-full bg-academic-300 rounded-full wave-bar"></span>
+      <span class="w-1 h-full bg-academic-300 rounded-full wave-bar"></span>
+      <span class="w-1 h-full bg-academic-300 rounded-full wave-bar"></span>
+    </div>
+    <span id="audio-indicator-text" class="text-xs sm:text-sm font-medium">Playing audio...</span>
+    <button onclick="stopSpeech()" class="ml-1 p-1 rounded-lg bg-academic-800 hover:bg-academic-700 text-academic-200" title="Stop Audio">
+      <i data-lucide="square" class="w-3.5 h-3.5"></i>
+    </button>
+  </div>
+
+  <!-- Non-blocking Notification Banner (for speech support / validation notices) -->
+  <div id="toast-banner" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 hidden max-w-md w-[92%] bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-xl flex items-center justify-between gap-3 text-sm">
+    <span id="toast-message">Notice</span>
+    <button onclick="hideToast()" class="text-slate-400 hover:text-white">
+      <i data-lucide="x" class="w-4 h-4"></i>
+    </button>
+  </div>
+
+  <!-- MAIN CONTENT CONTAINER -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8">
+
+    <!-- =====================================================================
+         MODULE 1: SOUND & CONTEXT WARM-UP (HOMOPHONE EXPLORER)
+    ===================================================================== -->
+    <section id="section-explorer" class="space-y-6">
+      <!-- Module Hero Card -->
+      <div class="bg-gradient-to-r from-academic-600 to-academic-800 rounded-3xl p-6 sm:p-8 text-white shadow-lg relative overflow-hidden">
+        <div class="relative z-10 max-w-3xl">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-sm text-xs font-semibold mb-3">
+            <i data-lucide="volume-2" class="w-3.5 h-3.5"></i> Module 1 • Sound & Context Warm-Up
+          </div>
+          <h2 class="font-display text-2xl sm:text-3xl font-bold mb-2">
+            Same Pronunciation, Different Meanings
+          </h2>
+          <p class="text-academic-100 text-sm sm:text-base leading-relaxed">
+            Homophones share identical phonetic pronunciations (<span class="font-mono bg-white/15 px-1.5 py-0.5 rounded">/ˈhɒm.ə.fəʊnz/</span>) but differ in spelling and meaning. Listen carefully to how each word sounds identical on its own, then hear how sentence context reveals the right spelling.
+          </p>
+        </div>
+        <!-- Decorative circle -->
+        <div class="hidden sm:block absolute -right-12 -bottom-16 w-64 h-64 rounded-full bg-white/10 pointer-events-none"></div>
+      </div>
+
+      <!-- Filter / Search Bar -->
+      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        <div class="relative flex-1">
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+          <input
+            type="text"
+            id="explorer-search"
+            oninput="renderExplorerCards()"
+            placeholder="Search Grade 10 homophones (e.g., affect, principal, stationery, cite)..."
+            class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-academic-500 focus:border-academic-500"
+          />
+        </div>
+        <div class="flex items-center gap-2 text-xs text-slate-500 px-1">
+          <i data-lucide="sparkles" class="w-4 h-4 text-academic-500"></i>
+          <span>Tip: Switch speed to <strong>0.75x</strong> in the header for clearer articulation.</span>
+        </div>
+      </div>
+
+      <!-- Homophone Cards Grid -->
+      <div id="explorer-grid" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <!-- Populated dynamically via JS -->
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         MODULE 2: AUDITORY DISCRIMINATION PRACTICE (SOUND DRILL)
+    ===================================================================== -->
+    <section id="section-practice" class="hidden space-y-6">
+      <!-- Module Header -->
+      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-academic-100 text-academic-800 text-xs font-semibold mb-2">
+              <i data-lucide="ear" class="w-3.5 h-3.5"></i> Module 2 • Auditory Discrimination Practice
+            </span>
+            <h2 class="font-display text-2xl font-bold text-slate-900">
+              Sound & Context Discrimination Drill
+            </h2>
+            <p class="text-slate-600 text-sm mt-1">
+              Train your ear to distinguish identical pronunciations using auditory sentence cues and phonetic comparison.
+            </p>
+          </div>
+          <!-- Mode Toggle -->
+          <div class="flex bg-slate-100 p-1 rounded-xl self-start">
+            <button onclick="setDrillMode('context')" id="drill-mode-context" class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-white text-academic-700 shadow-sm transition">
+              Context Match (Listen & Spell)
+            </button>
+            <button onclick="setDrillMode('samediff')" id="drill-mode-samediff" class="px-3.5 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition">
+              Same vs. Different Sound
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive Drill Card -->
+      <div class="max-w-3xl mx-auto bg-white rounded-3xl border border-slate-200 shadow-md overflow-hidden">
+        <!-- Drill Progress Header -->
+        <div class="bg-academic-50 px-6 py-4 border-b border-academic-100 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span id="drill-badge" class="px-2.5 py-1 rounded-lg bg-academic-600 text-white text-xs font-bold">
+              Drill 1 of 10
+            </span>
+            <span id="drill-score-pill" class="text-xs font-semibold text-academic-800">
+              Practice Streak: 0
+            </span>
+          </div>
+          <button onclick="resetDrill()" class="text-xs font-medium text-slate-500 hover:text-academic-700 inline-flex items-center gap-1">
+            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Restart Drill
+          </button>
+        </div>
+
+        <!-- Drill Body -->
+        <div class="p-6 sm:p-8 space-y-6">
+          <!-- Audio Player Box -->
+          <div class="bg-slate-50 border-2 border-dashed border-academic-200 rounded-2xl p-6 text-center space-y-4">
+            <p id="drill-instruction" class="text-sm font-medium text-slate-600">
+              Click <strong>Play Audio</strong> to hear the sentence, then select the homophone spelling that matches what you heard.
+            </p>
+
+            <div class="flex flex-wrap items-center justify-center gap-3">
+              <button onclick="playCurrentDrillAudio(1.0)" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-academic-600 hover:bg-academic-700 active:scale-[0.99] text-white font-semibold text-sm shadow-md shadow-academic-200 transition">
+                <i data-lucide="play" class="w-4 h-4 fill-current"></i> Play Audio
+              </button>
+              <button onclick="playCurrentDrillAudio(0.75)" class="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-white hover:bg-academic-50 text-academic-700 border border-academic-200 font-semibold text-sm transition">
+                <i data-lucide="snail" class="w-4 h-4"></i> Slow Replay (0.75x)
+              </button>
+            </div>
+
+            <!-- Optional Transcript Toggle for accessibility -->
+            <div>
+              <button onclick="toggleDrillClue()" id="drill-clue-btn" class="text-xs text-academic-600 hover:underline font-medium">
+                Need a visual sentence frame? Show text with blank
+              </button>
+              <p id="drill-visual-frame" class="hidden mt-3 text-base font-medium text-slate-800 bg-white py-2.5 px-4 rounded-xl border border-slate-200">
+                <!-- Filled dynamically -->
+              </p>
+            </div>
+          </div>
+
+          <!-- Options Container -->
+          <div id="drill-options" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <!-- Populated dynamically -->
+          </div>
+
+          <!-- Immediate Constructive Feedback Box -->
+          <div id="drill-feedback" class="hidden rounded-2xl p-5 border transition-all">
+            <div class="flex items-start gap-3">
+              <div id="drill-feedback-icon" class="mt-0.5"></div>
+              <div class="space-y-1 flex-1">
+                <h4 id="drill-feedback-title" class="font-bold text-base"></h4>
+                <p id="drill-feedback-sentence" class="text-sm font-medium text-slate-800"></p>
+                <p id="drill-feedback-explanation" class="text-sm text-slate-600 leading-relaxed"></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Next Button -->
+          <div class="flex justify-end pt-2">
+            <button onclick="nextDrillItem()" id="drill-next-btn" class="hidden inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm transition">
+              Next Item <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         MODULE 3: 20-ITEM HOMOPHONE LISTENING COMPREHENSION QUIZ
+    ===================================================================== -->
+    <section id="section-quiz" class="hidden space-y-6">
+
+      <!-- VIEW A: QUIZ START / STUDENT REGISTRATION SCREEN -->
+      <div id="quiz-intro-view" class="max-w-2xl mx-auto bg-white rounded-3xl border border-slate-200 shadow-md overflow-hidden">
+        <div class="bg-gradient-to-r from-academic-600 to-academic-800 p-6 sm:p-8 text-white">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 text-xs font-semibold mb-3">
+            <i data-lucide="clipboard-check" class="w-3.5 h-3.5"></i> Module 3 • 20-Item Assessment
+          </span>
+          <h2 class="font-display text-2xl sm:text-3xl font-bold">
+            Homophone Listening Comprehension Test
+          </h2>
+          <p class="text-academic-100 text-sm mt-2">
+            Designed for Grade 10 learners to evaluate auditory discrimination and contextual understanding of homophones.
+          </p>
+        </div>
+
+        <form onsubmit="startQuiz(event)" class="p-6 sm:p-8 space-y-5">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="student-name" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+                Student Full Name <span class="text-rose-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="student-name"
+                required
+                placeholder="e.g., Juan Dela Cruz"
+                class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-academic-500"
+              />
+            </div>
+            <div>
+              <label for="student-section" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+                Grade & Section <span class="text-rose-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="student-section"
+                required
+                placeholder="e.g., Grade 10 - Rizal"
+                class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-academic-500"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label for="test-type" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+              Assessment Type (For Research Tracking)
+            </label>
+            <select id="test-type" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-academic-500">
+              <option value="Pretest">Pretest (Dia
